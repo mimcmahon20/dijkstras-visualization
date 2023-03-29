@@ -1,4 +1,5 @@
 let game = document.getElementsByClassName("game")[0];
+let body = document.getElementsByTagName("body")[0];
 let gameWidth = game.offsetWidth;
 let gameHeight = game.offsetHeight;
 let description = document.getElementsByClassName("description")[0];
@@ -39,6 +40,9 @@ class row {
 }
 
 let totalRows = 20;
+if(body.clientWidth < 600) { 
+    totalRows = 10;
+}
 
 //rows
 let rows = new Array();
@@ -106,32 +110,37 @@ function dijkstra(startX, startY, goalX, goalY) {
         rows[node[0]].boxes[node[1]].box.style = "background-color: " + "rgb(" + (255 - minDistance * totalRows/3) + ", " + (255 - minDistance * totalRows) + ", " + (255 - minDistance * totalRows) + ")";
       }
     }
-
     // Remove the node from the unvisited set
     unvisited.delete(minNode);
-
-    // If we have reached the end node, return the path
-    if (minNode[0] === goalX && minNode[1] === goalY) {
-      let path = [];
-      let currentNode = minNode;
-      while (currentNode !== null) {
-        totalDistance++;
-        rows[currentNode[0]].boxes[currentNode[1]].box.style = 'background-color: yellow';
-        path.unshift(currentNode);
-        currentNode = paths[currentNode[0]][currentNode[1]];
+    if(minNode == null) {
+      description.innerHTML = "No path found";
+      resetGame();
+      return null;
+    } else {
+      // If we have reached the end node, return the path
+      if (minNode[0] === goalX && minNode[1] === goalY) {
+        let path = [];
+        let currentNode = minNode;
+        while (currentNode !== null) {
+          totalDistance++;
+          rows[currentNode[0]].boxes[currentNode[1]].box.style = 'background-color: yellow';
+          path.unshift(currentNode);
+          currentNode = paths[currentNode[0]][currentNode[1]];
+        }
+        return path;
       }
-      return path;
-    }
 
-    // Update the distances and paths of the neighboring nodes
-    let neighbors = getNeighbors(minNode[0], minNode[1]);
-    for (let neighbor of neighbors) {
-      let distance = distances[minNode[0]][minNode[1]] + 1;
-      if (distance < distances[neighbor[0]][neighbor[1]]) {
-        distances[neighbor[0]][neighbor[1]] = distance;
-        paths[neighbor[0]][neighbor[1]] = minNode;
+      // Update the distances and paths of the neighboring nodes
+      let neighbors = getNeighbors(minNode[0], minNode[1]);
+      for (let neighbor of neighbors) {
+        let distance = distances[minNode[0]][minNode[1]] + 1;
+        if (distance < distances[neighbor[0]][neighbor[1]]) {
+          distances[neighbor[0]][neighbor[1]] = distance;
+          paths[neighbor[0]][neighbor[1]] = minNode;
+        }
       }
     }
+    
   }
 
   // If we haven't found a path to the end node, return null
@@ -154,7 +163,6 @@ function dijkstra(startX, startY, goalX, goalY) {
     }
     return neighbors;
   }
-
 }
 
 function resetGame() {
@@ -183,14 +191,18 @@ function resetGame() {
 function startGame(startX, starty, goalX, goalY) {
     let distance = dijkstra(startX, startY, goalX, goalY);
     console.log(`Shortest distance from (${startX},${startY}) to (${goalX},${goalY}) is ${distance}`);
-    description.innerHTML = `Shortest distance from (${startX},${startY}) to (${goalX},${goalY}) is ${totalDistance}. It searched ${totalSearched} nodes.`;
+    if(distance == null) {
+      description.innerHTML = "No path found";
+    } else {
+      description.innerHTML = `Shortest distance from (${startX},${startY}) to (${goalX},${goalY}) is ${totalDistance}. It searched ${totalSearched} nodes.`;
+    }
 }
 
 function randomizeGame(startX, starty, goalX, goalY) {
     for(let i = 0; i < totalRows*1.5; i++) {
         let randomX = Math.floor(Math.random() * totalRows);
         let randomY = Math.floor(Math.random() * totalRows);
-        while(randomX == startX && randomY == startY || randomX == goalX && randomY == goalY) {
+        while((randomX === startX && randomY === startY) || (randomX === goalX && randomY === goalY)) {
             randomX = Math.floor(Math.random() * totalRows);
             randomY = Math.floor(Math.random() * totalRows);
         }
@@ -199,3 +211,4 @@ function randomizeGame(startX, starty, goalX, goalY) {
 }
 
 resetGame();
+
