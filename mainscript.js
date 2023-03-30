@@ -83,7 +83,7 @@ function dijkstra(startX, startY, goalX, goalY) {
       // Initialize the distances and paths to all nodes
   let distances = [];
   let paths = [];
-  for (let i = 0; i < totalRows; i++) {
+  for (let i = 0; i < totalRows*2; i++) {
     distances[i] = new Array(totalRows).fill(Infinity);
     paths[i] = new Array(totalRows).fill(null);
   }
@@ -93,6 +93,8 @@ function dijkstra(startX, startY, goalX, goalY) {
   let unvisited = new Set();
   for (let i = 0; i < totalRows; i++) {
     for (let j = 0; j < totalRows; j++) {
+      unvisited.add([i, j]);
+      unvisited.add([i, j]);
       unvisited.add([i, j]);
     }
   }
@@ -137,10 +139,10 @@ function dijkstra(startX, startY, goalX, goalY) {
         if (distance < distances[neighbor[0]][neighbor[1]]) {
           distances[neighbor[0]][neighbor[1]] = distance;
           paths[neighbor[0]][neighbor[1]] = minNode;
+          console.log("new path");
         }
       }
     }
-    
   }
 
   // If we haven't found a path to the end node, return null
@@ -188,7 +190,7 @@ function resetGame() {
     totalDistance = 0;
 }
 
-function startGame(startX, starty, goalX, goalY) {
+function startGame(startX, startY, goalX, goalY) {
     let distance = dijkstra(startX, startY, goalX, goalY);
     console.log(`Shortest distance from (${startX},${startY}) to (${goalX},${goalY}) is ${distance}`);
     if(distance == null) {
@@ -198,16 +200,17 @@ function startGame(startX, starty, goalX, goalY) {
     }
 }
 
-function randomizeGame(startX, starty, goalX, goalY) {
-    for(let i = 0; i < totalRows*1.5; i++) {
+function randomizeGame(startX, startY, goalX, goalY) {
+    for(let i = 0; i < totalRows; i++) {
         let randomX = Math.floor(Math.random() * totalRows);
         let randomY = Math.floor(Math.random() * totalRows);
-        while((randomX === startX && randomY === startY) || (randomX === goalX && randomY === goalY)) {
-            randomX = Math.floor(Math.random() * totalRows);
-            randomY = Math.floor(Math.random() * totalRows);
+        if(rows[randomX].boxes[randomY].box.classList.contains("start") == false && rows[randomX].boxes[randomY].box.classList.contains("goal") == false) {
+          rows[randomX].boxes[randomY].box.classList.add("clicked");
         }
-        rows[randomX].boxes[randomY].box.classList.add("clicked");
-    }
+        if(randomX == startX && randomY == startY) {
+          console.log("hi");
+        }
+      }
 }
 
 resetGame();
